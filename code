@@ -1,0 +1,39 @@
+import urllib.request
+import json
+
+# client_id：API Key     client_secret：Secret Key
+client_id = '*****'
+client_secret = '*****'
+def get_token():
+    host = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=' + client_id + '&client_secret=' + client_secret
+    request = urllib.request.Request(host)
+    request.add_header('Content-Type','application/json;charest=UTF-8')
+    response = urllib.request.urlopen(request)
+    token_content = response.read()
+    if token_content:
+        token_info = json.loads(token_content)
+        token_key = token_info['access_token']
+    return token_key
+
+def similar(text1,text2):
+    token = get_token()
+    url = 'https://aip.baidubce.com/rpc/2.0/nlp/v2/simnet'
+    # model可选
+    model = ['BOW','CNN','GRNN']
+    data2 = {'text_1': text1, 'text_2': text2,'model':model[0]}
+    post_data = json.dumps(data2).encode('utf-8')
+     # user-agent：本机的user-agent
+    header_dict = {'User-Agent': '*****',
+                   'Content-Type': 'application/json'}
+    access_token = token
+    url_all = url +"?access_token="+access_token
+    req = urllib.request.Request(url=url_all, data=bytes(post_data),headers=header_dict)
+    res = urllib.request.urlopen(req).read()
+    # print(res)
+    r_data= str(res, encoding="GBK")
+    res=json.loads(r_data)
+    print(text1,text2,res['score'])
+    
+t1 = 'apple pie'
+t2 = 'banana tree'
+similar(t1,t2)
